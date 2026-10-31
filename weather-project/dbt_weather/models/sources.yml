@@ -1,0 +1,7 @@
+version: 2
+
+sources:
+  - name: raw_weather
+    schema: raw
+    tables:
+      - name: weather_history_json

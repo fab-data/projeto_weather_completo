@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  airflow:
+    build: .
+    image: projeto-weather-airflow:local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: airflow:admin
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_PASSWORDS_FILE: /opt/airflow/config/simple_auth_manager_passwords.json
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW_UID: "50000"
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: weather_bd
+      POSTGRES_USER: weather_user
+      POSTGRES_PASSWORD: "123456"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./weather-project/airflow/dags:/opt/airflow/dags
+      - ./weather-project/src:/opt/airflow/src
+      - ./weather-project/dbt_weather:/opt/airflow/dbt
+      - ./data:/opt/airflow/data
+      - ./logs:/opt/airflow/logs
+      - ./config:/opt/airflow/config
+    command: airflow standalone
+    restart: unless-stopped
+
+volumes:
+  postgres-db-volume:

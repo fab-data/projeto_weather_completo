@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: stg_weather_history
+    description: "Dados meteorológicos horários normalizados e deduplicados."
+    columns:
+      - name: ingestion_id
+        tests:
+          - not_null
+
+      - name: latitude
+        tests:
+          - not_null
+
+      - name: longitude
+        tests:
+          - not_null
+
+      - name: timezone_name
+        tests:
+          - not_null
+
+      - name: weather_at_local
+        tests:
+          - not_null
+
+      - name: weather_at_utc
+        tests:
+          - not_null
