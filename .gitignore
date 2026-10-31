@@ -26,3 +26,16 @@ data/*.json
 
 # dbt user config
 weather-project/dbt_weather/.user.yml
+
+# Power BI local (o relatório fica fora do repo; só o print em docs/)
+*.pbix
+*.pbip
+*.Report/
+*.SemanticModel/
+
+# Scratch de agentes
+.superpowers/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
