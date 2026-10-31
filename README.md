@@ -24,25 +24,7 @@ O painel é modo import e não tem filtro de data: o recorte exibido é o da úl
 
 ## Arquitetura
 
-```mermaid
-flowchart LR
-    API[Open-Meteo Archive API] -->|requests| EX[extract_data.py]
-    EX -->|JSON| LD[load_data.py]
-    LD -->|JSONB| RAW[(raw.weather_history_json)]
-    RAW --> STG[staging.stg_weather_history]
-    STG --> INT[intermediate.int_weather__calculated]
-    INT --> FCT[(marts.fct_weather_hr)]
-    DD[(marts.dim_date)] --- FCT
-    DT[(marts.dim_time)] --- FCT
-    FCT --> PBI[Power BI]
-
-    AIR[Airflow 3 · weather_pipeline] -.-> EX
-    AIR -.-> LD
-    AIR -.->|dbt build| DBT[dbt]
-    DBT -.-> STG
-    DBT -.-> INT
-    DBT -.-> FCT
-```
+![Arquitetura do pipeline: Open-Meteo → Python → PostgreSQL → dbt → Power BI, orquestrado pelo Airflow](docs/pipeline.gif)
 
 O Airflow agenda uma execução diária (`0 6 * * *`, sem catchup) e roda
 `extract → load → dbt build` no mesmo container. A janela padrão vai de hoje-4 a hoje-2; uma
@@ -133,7 +115,9 @@ docker compose down -v && docker compose up -d --build
 ├── init-db/                          # schema raw e tabela de ingestão (primeiro boot)
 ├── config/                           # senha do simple auth manager
 ├── data/                             # JSONs extraídos (gitignored)
-└── docs/dashboard.png                # print do dashboard usado no README
+└── docs/
+    ├── dashboard.png                 # print do dashboard usado no topo
+    └── pipeline.gif                  # diagrama animado da arquitetura
 ```
 
 ## Fonte dos dados
